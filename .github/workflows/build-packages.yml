@@ -1,0 +1,93 @@
+name: Build OSGeo4W packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'package to build'
+        required: true
+        default: 'qgis-dev'
+
+  push:
+    paths: 'src/*/osgeo4w/**'
+
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  build:
+    runs-on: windows-2019
+
+    env:
+      TEMP: c:\temp
+      BASE: c:\w
+      SHELLOPTS: igncr
+      OSGEO4W_SKIP_UPLOAD: 1
+
+    defaults:
+      run:
+        shell: c:\cygwin\bin\bash.exe --login '{0}'
+
+    steps:
+    - name: Init
+      shell: cmd
+      run: |
+        cd \
+        if not exist %TEMP% mkdir %TEMP%
+        if not exist %BASE% mkdir %BASE%
+        rd %GITHUB_WORKSPACE%
+        cmd /c mklink /j %GITHUB_WORKSPACE% %BASE%
+        echo >%GITHUB_WORKSPACE%\foo.txt
+        if not exist %BASE%\foo.txt (echo junction not active & exit /b 1)
+        del %BASE%\foo.txt
+
+        curl --output c:\setup-x86_64.exe https://cygwin.com/setup-x86_64.exe
+        c:\setup-x86_64.exe -qnNdO -R C:/cygwin -s http://cygwin.mirror.constant.com -l C:/temp/cygwin -P "bison,flex,poppler,doxygen,git,unzip,tar,diffutils,patch,ssh,curl,wget,flip,p7zip,make,perl-Data-UUID,perl-Module-Build"
+        path c:\cygwin\bin;c:\cygwin\usr\bin
+        for /f "delims=" %%i in ('cygpath -a %GITHUB_WORKSPACE%') do set OSGEO4W_REP=%%i
+        echo PATH=c:\cygwin\bin;c:\cygwin\usr\bin>>%GITHUB_ENV%
+        echo OSGEO4W_REP=%OSGEO4W_REP%>>%GITHUB_ENV%
+        rmdir /s /q "c:/temp/cygwin"
+
+        rmdir /s /q "%ProgramFiles(x86)%\Windows Kits\10\lib\wdf"
+        rmdir /s /q "%ProgramFiles(x86)%\Windows Kits\10\include\wdf"
+        rmdir /s /q "%ProgramFiles(x86)%\Windows Kits\10\redist\wdf"
+        rmdir /s /q "%ProgramFiles(x86)%\Windows Kits\10\Tools"
+
+    - name: 'init git'
+      run: |
+        git config --global init.defaultBranch master
+        git config --global --add safe.directory $(cygpath -a $BASE)
+        git config --global --add safe.directory $(cygpath -a $GITHUB_WORKSPACE)
+
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 12
+        set-safe-directory: false
+
+    - name: 'Produce packages list from changed files'
+      if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+      run: |
+        echo PATH:$PATH BASH_VERSION:$BASH_VERSION
+        type -a bash
+
+        cd $GITHUB_WORKSPACE
+        echo PKGS=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | sed -ne 's#src/\([^/]*\)/osgeo4w/.*$#\1#p' | sort -u | paste -d ' ' -s) >>$GITHUB_ENV
+
+    - name: 'Packages to build'
+      if: ${{ github.event_name == 'workflow_dispatch' }}
+      run: |
+        echo PKGS=${{ github.event.inputs.package }} >>$GITHUB_ENV
+
+    - name: 'Build packages including reverse dependencies'
+      run: |
+        cd $OSGEO4W_REP
+        for p in $(perl scripts/build-inorder.pl $PKGS); do cd $(cygpath -a "$OSGEO4W_REP\\src\\$p\\osgeo4w") && bash package.sh || break; rm -rf osgeo4w; done
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: osgeo4w-repo
+        path: x86_64/
+        retention-days: 1
+
+# vim: set nowrap :
