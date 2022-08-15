@@ -9,6 +9,9 @@ on:
       skip-reverse-dependencies:
         description: 'skip rebuilding reverse dependencies'
         default: false
+      continue-on-error:
+        description: 'skip build errors'
+        default: false
 
   push:
     paths: 'src/*/osgeo4w/**'
@@ -126,10 +129,17 @@ jobs:
 
         fail=0
         for p in $PKGS; do
+          echo "::group::Building package $p"
           cd $(cygpath -a "$OSGEO4W_REP\\src\\$p\\osgeo4w")
           if ! bash package.sh; then
+            echo "::error title::Package $p::Build failed $?"
+            echo "::endgroup::"
             fail=1
-            break
+            if [[ "${{ github.event.inputs.continue-on-error }}" != "true" ]]; then
+              break
+            fi
+          else
+            echo "::endgroup::"
           fi
           rm -rf osgeo4w
         done
