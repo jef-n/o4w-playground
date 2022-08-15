@@ -34,7 +34,9 @@ startlog() {
 	log "Starting with clean PATH: $PATH"
 
 	[ "$BUILDDEPENDS" == "none" ] || {
-		fetchdeps $BUILDDEPENDS
+		local depends=$BUILDDEPENDS
+		[ -n "$CLCACHE_DIR" ] && depends="$depends python3-clcache"
+		fetchdeps $depends
 		export RUNTIMEDEPENDS=$(runtimedepends $BUILDDEPENDS)
 	}
 
@@ -162,8 +164,13 @@ vs2019env() {
 	export VS160COMNTOOLS=$(cygpath -aw "$vcdir")/Common7/Tools
 	fetchenv "$vcdir/VC/Auxiliary/Build/vcvarsall.bat" ${VCARCH:-amd64} $VCSDK
 	export PATH="$vcdir/VC/bin:$PATH"
-	export CC=cl.exe
-	export CXX=cl.exe
+	if [ -n "$CLCACHE_DIR" ]; then
+		export CC=cl.exe
+		export CXX=cl.exe
+	else
+		export CC=clcache.bat
+		export CXX=clcache.bat
+	fi
 }
 declare -x vs2019env
 
@@ -404,7 +411,7 @@ nextbinary() {
 			binary_test=1
 		fi
 		B=$binary_test
-		log "Building test version $V-$B"
+		log "Building test version $P-$V-$B"
 	else
 		version_prev=$version_curr
 		binary_prev=$binary_curr
@@ -417,7 +424,7 @@ nextbinary() {
 		fi
 
 		B=$binary_curr
-		log "Building production version $V-$B"
+		log "Building production version $P-$V-$B"
 	fi
 }
 declare -x nextbinary

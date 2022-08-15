@@ -3,10 +3,12 @@ name: Build OSGeo4W packages
 on:
   workflow_dispatch:
     inputs:
-      package:
-        description: 'package to build'
+      packages:
+        description: 'packages to build'
         required: true
-        default: 'qgis-dev'
+      no-reverse-dependencies:
+        description: 'skip rebuilding reverse dependencies'
+        default: false
 
   push:
     paths: 'src/*/osgeo4w/**'
@@ -23,6 +25,7 @@ jobs:
       BASE: c:\w
       SHELLOPTS: igncr
       OSGEO4W_SKIP_UPLOAD: 1
+      CLCACHE_DIR: c:\clcache
 
     defaults:
       run:
@@ -54,6 +57,8 @@ jobs:
         rmdir /s /q "%ProgramFiles(x86)%\Windows Kits\10\redist\wdf"
         rmdir /s /q "%ProgramFiles(x86)%\Windows Kits\10\Tools"
 
+        if not exist %CLCACHE_DIR% mkdir %CLCACHE_DIR%
+
     - name: 'init git'
       run: |
         git config --global init.defaultBranch master
@@ -68,23 +73,58 @@ jobs:
     - name: 'Produce packages list from changed files'
       if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
       run: |
-        echo PATH:$PATH BASH_VERSION:$BASH_VERSION
-        type -a bash
-
         cd $GITHUB_WORKSPACE
         echo PKGS=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | sed -ne 's#src/\([^/]*\)/osgeo4w/.*$#\1#p' | sort -u | paste -d ' ' -s) >>$GITHUB_ENV
 
     - name: 'Packages to build'
       if: ${{ github.event_name == 'workflow_dispatch' }}
       run: |
-        echo PKGS=${{ github.event.inputs.package }} >>$GITHUB_ENV
+        PKGS="${{ github.event.inputs.package }}"
+        if [[ "$[[ github.event.inputs.skip-reverse-dependencies}}" != "true" ]]; then
+          PKGS=$(perl scripts/build-inorder.pl $PKGS
+        fi
+        echo PKGS=$PKGS >>$GITHUB_ENV
 
-    - name: 'Build packages including reverse dependencies'
+    - name: cygwin cache
+
+    - name: Prepare clcache timestamp
+      id: clcache-timestamp
+      run: set::output name=timestamp::$(date +%Y.%m.%d.%H.%M.%S" UTC)
+
+    - name: clcache
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.CLCACHE_DIR }}
+        key: clcache-${{ steps.clcache-timestamp.outputs.timestamp }}
+        restore-keys: |
+          clcache-
+
+    - name: 'Build packages'
+      id: build
       run: |
+        set -e
         cd $OSGEO4W_REP
-        for p in $(perl scripts/build-inorder.pl $PKGS); do cd $(cygpath -a "$OSGEO4W_REP\\src\\$p\\osgeo4w") && bash package.sh || break; rm -rf osgeo4w; done
+
+        echo "CLCACHE BEFORE:"
+        ccache -s
+
+        fail=0
+        for p in $PKGS; do
+          cd $(cygpath -a "$OSGEO4W_REP\\src\\$p\\osgeo4w")
+          if ! bash package.sh; then
+            fail=1
+            break
+          fi
+          rm -rf osgeo4w
+        done
+
+        echo "CLCACHE AFTER:"
+        ccache -s
+
+        echo ::set:-output name=fail::$fail
 
     - uses: actions/upload-artifact@v2
+      if: ${{ step.build.output.fail == 0 }}
       with:
         name: osgeo4w-repo
         path: x86_64/
