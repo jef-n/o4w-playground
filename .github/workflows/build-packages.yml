@@ -87,7 +87,7 @@ jobs:
 
     - name: Prepare clcache timestamp
       id: clcache-timestamp
-      run: set::output name=timestamp::$(date +%Y.%m.%d.%H.%M.%S" UTC)
+      run: echo ::set::output name=timestamp::$(date +%Y.%m.%d.%H.%M.%S" UTC)
 
     - name: clcache
       uses: actions/cache@v3
@@ -119,10 +119,10 @@ jobs:
         echo "CLCACHE AFTER:"
         ccache -s
 
-        echo ::set:-output name=fail::$fail
+        echo ::set::output name=fail::$fail
 
     - uses: actions/upload-artifact@v2
-      if: ${{ step.build.output.fail == 0 }}
+      if: ${{ step.build.output.fail == '0' }}
       with:
         name: osgeo4w-repo
         path: x86_64/
