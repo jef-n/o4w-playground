@@ -92,23 +92,23 @@ jobs:
       if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
       run: |
         cd $GITHUB_WORKSPACE
-        echo PKGS=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | sed -ne 's#src/\([^/]*\)/osgeo4w/.*$#\1#p' | sort -u | paste -d ' ' -s) >>$GITHUB_ENV
+        PKGS=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | sed -ne 's#src/\([^/]*\)/osgeo4w/.*$#\1#p' | sort -u | paste -d ' ' -s) >>$GITHUB_ENV
+        echo PKGS=$(perl scripts/build-inorder.pl $PKGS) >>$GITHUB_ENV
 
     - name: 'Packages to build'
       if: ${{ github.event_name == 'workflow_dispatch' }}
       run: |
-        echo PKGS=${{ github.event.inputs.packages }} >>$GITHUB_ENV
+        PKGS=${{ github.event.inputs.packages }}
+        if [[ "${{ github.event.inputs.skip-reverse-dependencies }}" != "true" ]]; then
+          PKGS=$(perl scripts/build-inorder.pl $PKGS)
+        fi
+        echo PKGS=$PKGS
 
-    - name: 'Deduce reverse dependencies'
-      if: ${{ github.event.inputs.skip-reverse-dependencies != "true" }}
-      run: |
-        echo PKGS=$(perl scripts/build-inorder.pl $PKGS) >>$GITHUB_ENV
-
-    - name: Prepare clcache timestamp
+    - name: 'Prepare clcache timestamp'
       id: clcache-timestamp
       run: echo ::set::output name=timestamp::$(date +%Y.%m.%d.%H.%M.%S)
 
-    - name: clcache
+    - name: 'clcache'
       uses: actions/cache@v3
       with:
         path: ${{ env.CLCACHE_DIR }}
