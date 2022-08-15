@@ -32,6 +32,7 @@ jobs:
         shell: c:\cygwin\bin\bash.exe --login '{0}'
 
     steps:
+
     - name: Prepare cygwin cache timestamp
       id: cygwin-timestamp
       shell: bash
@@ -52,7 +53,6 @@ jobs:
         c:\setup-x86_64.exe -qnNdO -R C:/cygwin -s http://cygwin.mirror.constant.com -l C:/temp/cygwin -P "bison,flex,poppler,doxygen,git,unzip,tar,diffutils,patch,ssh,curl,wget,flip,p7zip,make,perl-Data-UUID,perl-Module-Build"
         path c:\cygwin\bin;c:\cygwin\usr\bin
 
-    steps:
     - name: Init
       shell: cmd
       run: |
