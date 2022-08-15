@@ -31,6 +31,7 @@ jobs:
       run:
         shell: c:\cygwin\bin\bash.exe --login '{0}'
 
+    steps:
     - name: Prepare cygwin cache timestamp
       id: cygwin-timestamp
       shell: bash
