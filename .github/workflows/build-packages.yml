@@ -97,11 +97,12 @@ jobs:
     - name: 'Packages to build'
       if: ${{ github.event_name == 'workflow_dispatch' }}
       run: |
-        PKGS="${{ github.event.inputs.package }}"
-        if [[ "$[[ github.event.inputs.skip-reverse-dependencies}}" != "true" ]]; then
-          PKGS=$(perl scripts/build-inorder.pl $PKGS
-        fi
-        echo PKGS=$PKGS >>$GITHUB_ENV
+        echo PKGS=${{ github.event.inputs.packages }} >>$GITHUB_ENV
+
+    - name: 'Deduce reverse dependencies'
+      if: ${{ github.event.inputs.skip-reverse-dependencies != "true" }}
+      run: |
+        echo PKGS=$(perl scripts/build-inorder.pl $PKGS) >>$GITHUB_ENV
 
     - name: Prepare clcache timestamp
       id: clcache-timestamp
