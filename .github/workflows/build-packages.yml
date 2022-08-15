@@ -100,9 +100,10 @@ jobs:
       run: |
         PKGS=${{ github.event.inputs.packages }}
         if [[ "${{ github.event.inputs.skip-reverse-dependencies }}" != "true" ]]; then
+          cd $GITHUB_WORKSPACE
           PKGS=$(perl scripts/build-inorder.pl $PKGS)
         fi
-        echo PKGS=$PKGS
+        echo PKGS=$PKGS >>$GITHUB_ENV
 
     - name: 'Prepare clcache timestamp'
       id: clcache-timestamp
