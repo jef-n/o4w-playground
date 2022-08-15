@@ -34,7 +34,7 @@ jobs:
     - name: Prepare cygwin cache timestamp
       id: cygwin-timestamp
       shell: bash
-      run: echo ::set::output name=timestamp::$(date +%Y-%m-%d UTC)
+      run: echo ::set::output name=timestamp::$(date +%Y.%m.%d UTC)
 
     - name: cygwin-cache
       uses: actions/cache@v3
@@ -44,7 +44,7 @@ jobs:
         restore-keys: cygwin-
 
     - name: cygwin
-      if: steps.cache-cygwin.outputs.cache-hit != 'true'
+      if: steps.cygwin-cache.outputs.cache-hit != 'true'
       shell: cmd
       run: |
         curl --output c:\setup-x86_64.exe https://cygwin.com/setup-x86_64.exe
