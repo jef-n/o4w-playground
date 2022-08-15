@@ -37,7 +37,7 @@ jobs:
     steps:
 
     - name: Prepare cygwin cache timestamp
-      id: cygwin_timestamp
+      id: cygwin-timestamp
       shell: bash
       run: echo ::set-output name=timestamp::$(date +%Y.%m.%d)
 
@@ -46,11 +46,11 @@ jobs:
       uses: actions/cache@v3
       with:
         path: c:\cygwin
-        key: cygwin-${{ steps.cygwin_timestamp.outputs.timestamp }}
+        key: cygwin-${{ steps.cygwin-timestamp.outputs.timestamp }}
         restore-keys: cygwin-
 
     - name: cygwin
-      if: ${{ steps.cygwin-cache.outputs.cache-hit == 'false' }}
+      if: steps.cygwin-cache.outputs.cache-hit != 'true'
       shell: cmd
       run: |
         curl --output c:\setup-x86_64.exe https://cygwin.com/setup-x86_64.exe
@@ -93,14 +93,14 @@ jobs:
         set-safe-directory: false
 
     - name: 'Produce packages list from changed files'
-      if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+      if: github.event_name == 'push' || github.event_name == 'pull_request'
       run: |
         cd $GITHUB_WORKSPACE
         PKGS=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | sed -ne 's#src/\([^/]*\)/osgeo4w/.*$#\1#p' | sort -u | paste -d ' ' -s) >>$GITHUB_ENV
         echo PKGS=$(perl scripts/build-inorder.pl $PKGS) >>$GITHUB_ENV
 
     - name: 'Packages to build'
-      if: ${{ github.event_name == 'workflow_dispatch' }}
+      if: github.event_name == 'workflow_dispatch'
       run: |
         PKGS="${{ github.event.inputs.packages }}"
         if [[ "${{ github.event.inputs.skip-reverse-dependencies }}" != "true" ]]; then
@@ -146,7 +146,7 @@ jobs:
         echo ::set-output name=fail::$fail
 
     - uses: actions/upload-artifact@v2
-      if: ${{ steps.build.output.fail == 0 }}
+      if: steps.build.output.fail == 0
       with:
         name: osgeo4w-repo
         path: x86_64/
