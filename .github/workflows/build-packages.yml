@@ -119,7 +119,7 @@ jobs:
     - name: 'Build packages'
       id: build
       run: |
-        set -e
+        set -e -x
         cd $OSGEO4W_REP
 
         echo "CLCACHE BEFORE:"
