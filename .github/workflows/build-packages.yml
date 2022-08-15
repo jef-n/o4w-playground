@@ -36,7 +36,7 @@ jobs:
     - name: Prepare cygwin cache timestamp
       id: cygwin_timestamp
       shell: bash
-      run: echo ::set::output name=timestamp::$(date +%Y.%m.%d)
+      run: echo ::set-output name=timestamp::$(date +%Y.%m.%d)
 
     - name: cygwin-cache
       uses: actions/cache@v3
@@ -108,7 +108,7 @@ jobs:
 
     - name: 'Prepare clcache timestamp'
       id: clcache_timestamp
-      run: echo ::set::output name=timestamp::$(date +%Y.%m.%d.%H.%M.%S)
+      run: echo ::set-output name=timestamp::$(date +%Y.%m.%d.%H.%M.%S)
 
     - name: 'clcache'
       uses: actions/cache@v3
@@ -134,7 +134,7 @@ jobs:
           rm -rf osgeo4w
         done
 
-        echo ::set::output name=fail::$fail
+        echo ::set-output name=fail::$fail
 
     - uses: actions/upload-artifact@v2
       if: ${{ steps.build.output.fail == 0 }}
