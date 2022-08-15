@@ -60,6 +60,10 @@ declare -x runtimedepends
 endlog() {
 	local r=$?
 
+	if [ -n "$CLCACHE_DIR" ]; then
+		clcache -s
+	fi
+
 	if [ "$OSGEO4W_BUILDMODE" = "test" -a $OSGEO4W_HINTS -eq 0 ]; then
 		log "WARNING: test build without hints"
 	fi
@@ -170,6 +174,7 @@ vs2019env() {
 	else
 		export CC=clcache.bat
 		export CXX=clcache.bat
+		clcache -s
 	fi
 }
 declare -x vs2019env

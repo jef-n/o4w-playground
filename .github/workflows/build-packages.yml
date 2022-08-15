@@ -124,9 +124,6 @@ jobs:
         set -e -x
         cd $OSGEO4W_REP
 
-        echo "CLCACHE BEFORE:"
-        clcache -s
-
         fail=0
         for p in $PKGS; do
           cd $(cygpath -a "$OSGEO4W_REP\\src\\$p\\osgeo4w")
@@ -136,9 +133,6 @@ jobs:
           fi
           rm -rf osgeo4w
         done
-
-        echo "CLCACHE AFTER:"
-        clcache -s
 
         echo ::set::output name=fail::$fail
 
