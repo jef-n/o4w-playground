@@ -33,12 +33,19 @@ startlog() {
 	export PATH=$(cygpath -S):$(cygpath -W):$(cygpath -S)/WBem:/bin:/usr/bin
 	log "Starting with clean PATH: $PATH"
 
-	[ "$BUILDDEPENDS" == "none" ] || {
-		local depends=$BUILDDEPENDS
-		[ -n "$CLCACHE_DIR" ] && depends="$depends python3-clcache"
+	local depends=$BUILDDEPENDS
+	if [ "$depends" = "none" ]; then
+		depends=
+	fi
+
+	if [ -n "$CLCACHE_DIR" ]; then
+		depends="$depends python3-clcache"
+	fi
+
+	if [ -n "$depends" ]; then
 		fetchdeps $depends
 		export RUNTIMEDEPENDS=$(runtimedepends $BUILDDEPENDS)
-	}
+	fi
 
 	trap "faillog" EXIT
 }
