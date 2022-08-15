@@ -10,7 +10,7 @@ on:
         description: 'skip rebuilding reverse dependencies'
         default: false
       continue-on-error:
-        description: 'skip build errors'
+        description: 'continue on build errors'
         default: false
 
   push:
@@ -102,7 +102,7 @@ jobs:
     - name: 'Packages to build'
       if: ${{ github.event_name == 'workflow_dispatch' }}
       run: |
-        PKGS=${{ github.event.inputs.packages }}
+        PKGS="${{ github.event.inputs.packages }}"
         if [[ "${{ github.event.inputs.skip-reverse-dependencies }}" != "true" ]]; then
           cd $GITHUB_WORKSPACE
           PKGS=$(perl scripts/build-inorder.pl $PKGS)
