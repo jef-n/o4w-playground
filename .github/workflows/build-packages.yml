@@ -6,7 +6,7 @@ on:
       packages:
         description: 'packages to build'
         required: true
-      no-reverse-dependencies:
+      skip-reverse-dependencies:
         description: 'skip rebuilding reverse dependencies'
         default: false
 
@@ -125,7 +125,7 @@ jobs:
         cd $OSGEO4W_REP
 
         echo "CLCACHE BEFORE:"
-        ccache -s
+        clcache -s
 
         fail=0
         for p in $PKGS; do
@@ -138,7 +138,7 @@ jobs:
         done
 
         echo "CLCACHE AFTER:"
-        ccache -s
+        clcache -s
 
         echo ::set::output name=fail::$fail
 
