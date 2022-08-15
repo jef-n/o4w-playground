@@ -36,7 +36,7 @@ jobs:
     - name: Prepare cygwin cache timestamp
       id: cygwin-timestamp
       shell: bash
-      run: echo ::set::output name=timestamp::$(date +%Y.%m.%d UTC)
+      run: echo ::set::output name=timestamp::$(date +%Y.%m.%d)
 
     - name: cygwin-cache
       uses: actions/cache@v3
@@ -105,7 +105,7 @@ jobs:
 
     - name: Prepare clcache timestamp
       id: clcache-timestamp
-      run: echo ::set::output name=timestamp::$(date +%Y.%m.%d.%H.%M.%S" UTC)
+      run: echo ::set::output name=timestamp::$(date +%Y.%m.%d.%H.%M.%S)
 
     - name: clcache
       uses: actions/cache@v3
