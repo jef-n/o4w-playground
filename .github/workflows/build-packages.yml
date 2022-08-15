@@ -34,7 +34,7 @@ jobs:
     steps:
 
     - name: Prepare cygwin cache timestamp
-      id: cygwin-timestamp
+      id: cygwin_timestamp
       shell: bash
       run: echo ::set::output name=timestamp::$(date +%Y.%m.%d)
 
@@ -42,7 +42,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: c:\cygwin
-        key: cygwin-${{ steps.cygwin-timestamp.outputs.timestamp }}
+        key: cygwin-${{ steps.cygwin_timestamp.outputs.timestamp }}
         restore-keys: cygwin-
 
     - name: cygwin
@@ -107,14 +107,14 @@ jobs:
         echo PKGS=$PKGS >>$GITHUB_ENV
 
     - name: 'Prepare clcache timestamp'
-      id: clcache-timestamp
+      id: clcache_timestamp
       run: echo ::set::output name=timestamp::$(date +%Y.%m.%d.%H.%M.%S)
 
     - name: 'clcache'
       uses: actions/cache@v3
       with:
         path: ${{ env.CLCACHE_DIR }}
-        key: clcache-${{ steps.clcache-timestamp.outputs.timestamp }}
+        key: clcache-${{ steps.clcache_timestamp.outputs.timestamp }}
         restore-keys: |
           clcache-
 
