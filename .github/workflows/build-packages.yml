@@ -85,8 +85,6 @@ jobs:
         fi
         echo PKGS=$PKGS >>$GITHUB_ENV
 
-    - name: cygwin cache
-
     - name: Prepare clcache timestamp
       id: clcache-timestamp
       run: set::output name=timestamp::$(date +%Y.%m.%d.%H.%M.%S" UTC)
