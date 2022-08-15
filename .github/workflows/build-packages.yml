@@ -65,6 +65,7 @@ jobs:
         if not exist %BASE%\foo.txt (echo junction not active & exit /b 1)
         del %BASE%\foo.txt
 
+        path c:\cygwin\bin;c:\cygwin\usr\bin
         for /f "delims=" %%i in ('cygpath -a %GITHUB_WORKSPACE%') do set OSGEO4W_REP=%%i
         echo PATH=c:\cygwin\bin;c:\cygwin\usr\bin>>%GITHUB_ENV%
         echo OSGEO4W_REP=%OSGEO4W_REP%>>%GITHUB_ENV%
