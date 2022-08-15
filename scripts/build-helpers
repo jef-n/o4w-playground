@@ -172,9 +172,6 @@ vs2019env() {
 		exit 1
 	fi
 
-	export VS160COMNTOOLS=$(cygpath -aw "$vcdir")/Common7/Tools
-	fetchenv "$vcdir/VC/Auxiliary/Build/vcvarsall.bat" ${VCARCH:-amd64} $VCSDK
-	export PATH="$vcdir/VC/bin:$PATH"
 	if [ -z "$CLCACHE_DIR" ]; then
 		export CC=cl.exe
 		export CXX=cl.exe
@@ -184,6 +181,10 @@ vs2019env() {
 		fetchenv osgeo4w/bin/o4w_env.bat
 		clcache -s
 	fi
+
+	export VS160COMNTOOLS=$(cygpath -aw "$vcdir")/Common7/Tools
+	fetchenv "$vcdir/VC/Auxiliary/Build/vcvarsall.bat" ${VCARCH:-amd64} $VCSDK
+	export PATH="$vcdir/VC/bin:$PATH"
 }
 declare -x vs2019env
 
