@@ -168,7 +168,7 @@ vs2019env() {
 	export VS160COMNTOOLS=$(cygpath -aw "$vcdir")/Common7/Tools
 	fetchenv "$vcdir/VC/Auxiliary/Build/vcvarsall.bat" ${VCARCH:-amd64} $VCSDK
 	export PATH="$vcdir/VC/bin:$PATH"
-	if [ -n "$CLCACHE_DIR" ]; then
+	if [ -z "$CLCACHE_DIR" ]; then
 		export CC=cl.exe
 		export CXX=cl.exe
 	else
