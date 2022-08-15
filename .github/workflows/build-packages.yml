@@ -49,7 +49,7 @@ jobs:
         restore-keys: cygwin-
 
     - name: cygwin
-      if: steps.cygwin-cache.outputs.cache-hit != 'true'
+      if: ${{ steps.cygwin-cache.outputs.cache-hit == 'false' }}
       shell: cmd
       run: |
         curl --output c:\setup-x86_64.exe https://cygwin.com/setup-x86_64.exe
@@ -111,15 +111,14 @@ jobs:
 
     - name: 'Prepare clcache timestamp'
       id: clcache_timestamp
-      run: echo ::set-output name=timestamp::$(date +%Y.%m.%d.%H.%M.%S)
+      run: echo ::set-output name=timestamp::$(date +%Y.%m.%d.%H)
 
     - name: 'clcache'
       uses: actions/cache@v3
       with:
         path: ${{ env.CLCACHE_DIR }}
         key: clcache-${{ steps.clcache_timestamp.outputs.timestamp }}
-        restore-keys: |
-          clcache-
+        restore-keys: clcache-
 
     - name: 'Build packages'
       id: build
