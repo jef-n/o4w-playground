@@ -68,6 +68,7 @@ endlog() {
 	local r=$?
 
 	if [ -n "$CLCACHE_DIR" ]; then
+		echo $PATH
 		clcache -s
 	fi
 

@@ -12,6 +12,15 @@ on:
       continue-on-error:
         description: 'continue on build errors'
         default: false
+      skip-upload:
+        description: 'skip upload'
+        default: true
+      skip-tests:
+        description: 'skip tests'
+        default: false
+      force-rebuild:
+        description: 'force rebuild'
+        default: false
 
   push:
     paths: 'src/*/osgeo4w/**'
@@ -28,6 +37,12 @@ jobs:
       BASE: c:\w
       SHELLOPTS: igncr
       OSGEO4W_SKIP_UPLOAD: 1
+      # OSGEO4W_SKIP_CLEAN: 1
+      # OSGEO4W_SKIP_TESTS: 1
+      # OSGEO4W_SKIP_INSTALL: 1
+      # OSGEO4W_RSYNC_OPT: -n
+      # OSGEO4W_FORCE_REBUILD: 1
+      # OSGEO4W_BUILDMODE: test
       CLCACHE_DIR: c:\clcache
 
     defaults:
@@ -108,6 +123,13 @@ jobs:
           PKGS=$(perl scripts/build-inorder.pl $PKGS)
         fi
         echo PKGS=$PKGS >>$GITHUB_ENV
+
+        if [[ "${{ github.event.inputs.force-rebuild}}" == "true" ]]; then
+          echo OSGEO4W_FORCE_REBUILD=1 >>$GITHUB_ENV
+        fi
+        if [[ "${{ github.event.inputs.skip-tests}}" == "true" ]]; then
+          echo OSGEO4W_SKIP_TESTS=1 >>$GITHUB_ENV
+        fi
 
     - name: 'Prepare clcache timestamp'
       id: clcache_timestamp
