@@ -177,9 +177,10 @@ vs2019env() {
 		export CC=cl.exe
 		export CXX=cl.exe
 	else
-		export CC=clcache.bat
-		export CXX=clcache.bat
+		export CC=clcache.exe
+		export CXX=clcache.exe
 		fetchenv osgeo4w/bin/o4w_env.bat
+		echo PATH:$PATH
 		clcache -s
 	fi
 

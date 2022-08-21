@@ -21,6 +21,12 @@ on:
       force-rebuild:
         description: 'force rebuild'
         default: false
+      qgis-dev-repo:
+        description: "qgis repo"
+        default: https://github.com/qgis/QGIS.git
+      qgis-dev-branch:
+        description: "qgis branch"
+        default: master
 
   push:
     paths: 'src/*/osgeo4w/**'
@@ -124,6 +130,12 @@ jobs:
         fi
         echo PKGS=$PKGS >>$GITHUB_ENV
 
+        if [[ -n "${{ github.event.inputs.qgis-dev-repo}}" ]]; then
+          echo QGIS_REPO="${{ github.event.inputs.qgis-dev-repo}}" >>$GITHUB_ENV
+        fi
+        if [[ -n "${{ github.event.inputs.qgis-dev-branch}}" ]]; then
+          echo QGIS_BRANCH="${{ github.event.inputs.qgis-dev-branch}}" >>$GITHUB_ENV
+        fi
         if [[ "${{ github.event.inputs.force-rebuild}}" == "true" ]]; then
           echo OSGEO4W_FORCE_REBUILD=1 >>$GITHUB_ENV
         fi

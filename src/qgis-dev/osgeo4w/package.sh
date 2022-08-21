@@ -10,17 +10,15 @@ export BUILDDEPENDS="expat-devel fcgi-devel proj-devel gdal-dev-devel qt5-oci qt
 : ${CXX:=cl.exe}
 : ${BUILDCONF:=RelWithDebInfo}
 : ${PUSH_TO_DASH:=TRUE}
-
-REPO=https://github.com/qgis/QGIS.git
+: ${QGIS_REPO:=https://github.com/qgis/QGIS.git}
+: ${QGIS_BRANCH:=master}
+: ${LABEL:=development}
 
 export SITE TARGET CC CXX BUILDCONF
 
 source ../../../scripts/build-helpers
 
 startlog
-
-
-LABEL="development"
 
 cd ..
 
@@ -37,7 +35,7 @@ if [ -d qgis ]; then
 		git pull
 	fi
 else
-	git clone $REPO --branch master --single-branch qgis
+	git clone $QGIS_REPO --branch $QGIS_BRANCH --single-branch qgis
 	cd qgis
 	git config core.filemode false
 fi
