@@ -68,6 +68,7 @@ endlog() {
 	local r=$?
 
 	if [ -n "$CLCACHE_DIR" ]; then
+		fetchenv $OSGEO4W_PWD/osgeo4w/bin/o4w_env.bat
 		echo $PATH
 		clcache -s
 	fi
