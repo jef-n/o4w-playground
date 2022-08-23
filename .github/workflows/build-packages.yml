@@ -22,10 +22,10 @@ on:
         description: 'force rebuild'
         default: false
       qgis-dev-repo:
-        description: "qgis repo"
+        description: "override qgis-dev repo"
         default: https://github.com/qgis/QGIS.git
       qgis-dev-branch:
-        description: "qgis branch"
+        description: "override qgis-dev branch"
         default: master
 
   push:
@@ -143,16 +143,13 @@ jobs:
           echo OSGEO4W_SKIP_TESTS=1 >>$GITHUB_ENV
         fi
 
-    - name: 'Prepare clcache timestamp'
-      id: clcache_timestamp
-      run: echo ::set-output name=timestamp::$(date +%Y.%m.%d.%H)
-
-    - name: 'clcache'
-      uses: actions/cache@v3
+    - name: 'Prepare clcache '
+      uses: pat-s/always-upload-cache@v3.0.1
       with:
         path: ${{ env.CLCACHE_DIR }}
-        key: clcache-${{ steps.clcache_timestamp.outputs.timestamp }}
-        restore-keys: clcache-
+        key: clcache-${{ github.run_id }}
+        restore-keys: |
+	  clcache-
 
     - name: 'Build packages'
       id: build

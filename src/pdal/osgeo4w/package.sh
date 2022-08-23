@@ -19,6 +19,7 @@ startlog
 (
 	set -e
 
+	fetchenv osgeo4w/bin/o4w_env.bat
 	vs2019env
 	cmakeenv
 	ninjaenv
